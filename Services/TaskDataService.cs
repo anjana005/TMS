@@ -2,13 +2,13 @@
 using TMS.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace TMS.Services
+namespace TMS.Service
 {
-    public class TaskDataServices
+    public class TaskDataService
     {
         private readonly ApplicationDbContext _applicationDbContext;
 
-        public TaskDataServices(ApplicationDbContext applicationDbContext)
+        public TaskDataService(ApplicationDbContext applicationDbContext)
         {
             _applicationDbContext = applicationDbContext;
         }
