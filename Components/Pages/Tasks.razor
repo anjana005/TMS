@@ -1,85 +1,68 @@
-﻿@page "/tasks"
+﻿@page "/Tasks"
+@using TMS.Data
+@using TMS.Service
+@inject TaskDataService taskDataService
 @attribute [StreamRendering]
 
-<PageTitle>tasks</PageTitle>
+<PageTitle>Tasks</PageTitle>
+<span class="flex justify-between p-2">
+    <h1 class="text-3xl font-semibold text-purple-900">Tasks</h1>
+    <NavLink class="focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-3 py-1.5 mb-1 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900" href="AddNewTask">Create Task</NavLink>
+</span>
 
-<h1 class="text-4xl text-purple-900">Tasks</h1>
-
-@if (forecasts == null)
+@if (TaskObj == null)
 {
-    <p><em>Loading...</em></p>
+    <p><em>Loading..............................</em></p>
 }
 else
-{
+{     
         <div class="relative overflow-x-auto p-8">
-        <table class="w-full text-sm text-left rtl:text-right text-gray-500">
+            <table class="w-full text-sm text-left rtl:text-right text-gray-500">
                 <thead class="text-xs text-white bg-purple-900 border-3 border-purple-200">
-                <tr>
-                    <th scope="col" class="px-6 py-3">
-                            Task
-                    </th>
-                    <th scope="col" class="px-6 py-3">
-                            Desc
-                    </th>
-                    <th scope="col" class="px-6 py-3">
-                            Assigned To
-                    </th>
-                    <th scope="col" class="px-6 py-3">
-                            Status
-                    </th>
-                    <th scope="col" class="px-6 py-3">
-                            Date
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-               
-                @foreach (var forecast in forecasts)
-                {
-                        <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                            <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                            @forecast.Date.ToShortDateString()
-                            </th>
-                            <td class="px-6 py-4">
-                            @forecast.TemperatureC
-                            </td>
-                            <td class="px-6 py-4">
-                            @forecast.TemperatureF
-                            </td>
-                            <td class="px-6 py-4">
-                            @forecast.Summary
-                            </td>
-                        </tr>
-                }
-            </tbody>
-        </table>
-    </div>
+                    <tr>
+                        <th scope="col" class="px-6 py-3">
+                                Title 
+                        </th>
+                        <th scope="col" class="px-6 py-3">
+                                Description
+                        </th>
+                        <th scope="col" class="px-6 py-3">
+                                Due Date
+                        </th>
+                        <th scope="col" class="px-6 py-3">
+                                Status
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var task in TaskObj)
+                    {
+                            <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                                <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                @task.Title
+                                </th>
+                                <td class="px-6 py-4">
+                                @task.Description
+                                </td>
+                                <td class="px-6 py-4">
+                                @task.DueDate
+                                </td>
+                                <td class="px-6 py-4">
+                                @task.Status
+                                </td>
+                            </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
 
 }
 
 @code {
-    private WeatherForecast[]? forecasts;
+    List<TaskData> TaskObj;
 
     protected override async Task OnInitializedAsync()
     {
-        // Simulate asynchronous loading to demonstrate streaming rendering
-        await Task.Delay(500);
-
-        var startDate = DateOnly.FromDateTime(DateTime.Now);
-        var summaries = new[] { "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching" };
-        forecasts = Enumerable.Range(1, 5).Select(index => new WeatherForecast
-        {
-            Date = startDate.AddDays(index),
-            TemperatureC = Random.Shared.Next(-20, 55),
-            Summary = summaries[Random.Shared.Next(summaries.Length)]
-        }).ToArray();
-    }
-
-    private class WeatherForecast
-    {
-        public DateOnly Date { get; set; }
-        public int TemperatureC { get; set; }
-        public string? Summary { get; set; }
-        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+        TaskObj = await Task.Run(() => taskDataService.GetAllTaskDatas());
     }
 }

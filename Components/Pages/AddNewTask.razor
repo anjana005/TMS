@@ -1,0 +1,43 @@
+﻿@page "/AddNewTask"
+@using TMS.Data
+@using TMS.Service
+@inject TaskDataService taskDataService
+@inject NavigationManager NavigationManager
+
+<h1 class="text-3xl font-semibold text-purple-900">Add New Tasks</h1>
+<form class="p-8">
+    <div class="bg-purple-900 p-8 rounded shadow-md w-96">
+        <!-- Task Title -->
+        <div class="mb-4 form-group">
+            <label for="title" class="block text-sm font-medium text-white">Title</label>
+            <input type="text" id="title" name="title" class="form-control mt-1 p-2 w-full border rounded-md" @bind="@obj.Title">
+        </div>
+
+        <!-- Task Description -->
+        <div class="mb-4 form-group">
+            <label for="description" class="block text-sm font-medium text-white">Description</label>
+            <textarea id="description" name="description" rows="3" class="form-control mt-1 p-2 w-full border rounded-md" @bind="@obj.Description"></textarea>
+        </div>
+
+        <div class="flex justify-end space-x-2">
+            <button class="px-4 py-2 bg-white font-bold text-purple-900 rounded hover:bg-purple-600 focus:outline-none focus:ring focus:border-blue-300" @onclick="@CreateNewTaskData">Create</button>
+            <button class="px-4 py-2 bg-white font-bold text-purple-900 rounded hover:bg-purple-600 focus:outline-none focus:ring focus:border-blue-300" @onclick="@Cancel">Cancel</button>
+        </div>
+    </div>
+</form>
+@code {
+    TaskData obj = new TaskData();
+
+    protected async void CreateNewTaskData()
+    {
+        Console.WriteLine("CreateNewTaskData method called");
+        await taskDataService.AddNewTaskData(obj);
+        NavigationManager.NavigateTo("Tasks");
+    }
+
+    protected void Cancel()
+    {
+        Console.WriteLine("Cancel method called");
+        NavigationManager.NavigateTo("Tasks");
+    }
+}
