@@ -3,6 +3,7 @@
 @using TMS.Service
 @inject TaskDataService taskDataService
 @attribute [StreamRendering]
+@inject NavigationManager NavigationManager
 
 <PageTitle>Tasks</PageTitle>
 <span class="flex justify-between p-2">
@@ -10,7 +11,7 @@
     <NavLink class="focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-3 py-1.5 mb-1 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900" href="AddNewTask">Create Task</NavLink>
 </span>
 
-@if (TaskObj == null)
+@if (taskData == null)
 {
     <p><em>Loading..............................</em></p>
 }
@@ -32,10 +33,13 @@ else
                         <th scope="col" class="px-6 py-3">
                                 Status
                         </th>
+                        <th scope="col" class="px-6 py-3">
+                                Action
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var task in TaskObj)
+                     @foreach (var task in taskData)
                     {
                             <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                                 <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
@@ -50,6 +54,9 @@ else
                                 <td class="px-6 py-4">
                                 @task.Status
                                 </td>
+                                <td class="px-6 py-4">
+                                    <button @onclick="editTask" class="focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-3 py-1.5 mb-1 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">Edit</button>
+                                </td>
                             </tr>
                     }
                 </tbody>
@@ -59,10 +66,18 @@ else
 }
 
 @code {
-    List<TaskData> TaskObj;
+    [Parameter]
+    public int Id { get; set; }
+
+    List<TaskData> taskData = new List<TaskData>();
 
     protected override async Task OnInitializedAsync()
     {
-        TaskObj = await Task.Run(() => taskDataService.GetAllTaskDatas());
+        taskData = await Task.Run(() => taskDataService.GetAllTaskDatas());
+    }
+
+    void editTask()
+    {
+        NavigationManager.NavigateTo($"/AddNewTask/{Id}");
     }
 }

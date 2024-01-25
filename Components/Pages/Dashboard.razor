@@ -1,51 +1,43 @@
 ﻿@page "/"
-<div class="h-full pt-10">
-    <div class="max-w-sm rounded overflow-hidden shadow-lg m-4">
-        <div class="px-4 py-1 h-10 w-full bg-purple-900 text-white text-lg rounded">
-            Task Name
-        </div>
-        <div class="px-4 py-4">
-            <p class="text-gray-700 text-base">
-                Task Description text ....................................
-            </p>
-        </div>
-        <div class="px-4 pt-4 pb-1">
-            <span class="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">#User</span>
-            <span class="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">#Date</span>
-            <span class="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">#Status</span>
-        </div>
-    </div>
+@using TMS.Data
+@using TMS.Service
+@inject TaskDataService taskDataService
+@attribute [StreamRendering]
 
-     <div class="max-w-sm rounded overflow-hidden shadow-lg m-4">
-        <div class="px-4 py-1 h-10 w-full bg-purple-900 text-white text-lg rounded">
-            Task Name
-        </div>
-        <div class="px-4 py-4">
-            <p class="text-gray-700 text-base">
-                Task Description text ....................................
-            </p>
-        </div>
-        <div class="px-4 pt-4 pb-1">
-            <span class="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">#User</span>
-            <span class="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">#Date</span>
-            <span class="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">#Status</span>
-        </div>
-    </div>
+<h1 class="text-3xl font-semibold text-purple-900">All Tasks</h1>
 
-    <div class="max-w-sm rounded overflow-hidden shadow-lg m-4">
-        <div class="px-4 py-1 h-10 w-full bg-purple-900 text-white text-lg rounded">
-            Task Name
-        </div>
-        <div class="px-4 py-4">
-            <p class="text-gray-700 text-base">
-                Task Description text ....................................
-            </p>
-        </div>
-        <div class="px-4 pt-4 pb-1">
-            <span class="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">#User</span>
-            <span class="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">#Date</span>
-            <span class="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">#Status</span>
-        </div>
+@if (taskData == null)
+{
+        <p><em>Loading..............................</em></p>
+}
+else
+{  
+    <div class="h-full pt-10">
+        @foreach (var task in taskData)
+        {
+                <div class="max-w-sm rounded overflow-hidden shadow-lg m-4">
+                    <div class="px-4 py-1 h-10 w-full bg-purple-900 text-white text-lg rounded">
+                    @task.Title
+                    </div>
+                    <div class="px-4 py-4">
+                        <p class="text-gray-700 text-base">
+                        @task.Description
+                        </p>
+                    </div>
+                    <div class="px-4 pt-4 pb-1">
+                        <span class="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">#Date:  @task.DueDate.ToString().Split(" ")[0]</span>
+                        <span class="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">#Status: @task.Status</span>
+                    </div>
+                </div>
+        }
     </div>
-</div>
+}
 
+@code {
+    List<TaskData> taskData = new List<TaskData>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        taskData = await Task.Run(() => taskDataService.GetAllTaskDatas());
+    }
+}
