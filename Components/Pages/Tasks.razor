@@ -4,80 +4,112 @@
 @inject TaskDataService taskDataService
 @attribute [StreamRendering]
 @inject NavigationManager NavigationManager
+@rendermode InteractiveServer
 
 <PageTitle>Tasks</PageTitle>
 <span class="flex justify-between p-2">
     <h1 class="text-3xl font-semibold text-purple-900">Tasks</h1>
-    <NavLink class="focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-3 py-1.5 mb-1 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900" href="AddNewTask">Create Task</NavLink>
+    <button class="focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-3 py-1.5 mb-1 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900" @onclick="NavigateToAddNewTaskPage">Create Task</button>
 </span>
+
+<style>
+.task-table th, .task-table td {
+  padding: 8px;
+  text-align: left;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.task-table {
+  overflow-x: auto;
+}
+.task-table th:nth-child(2), .task-table td:nth-child(2) {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+</style>
 
 @if (taskData == null)
 {
-    <p><em>Loading..............................</em></p>
+        <p><em>Loading..............................</em></p>
 }
 else
 {     
         <div class="relative overflow-x-auto p-8">
-            <table class="w-full text-sm text-left rtl:text-right text-gray-500">
+            <table class="w-full text-sm text-left rtl:text-right text-gray-500 task-table">
                 <thead class="text-xs text-white bg-purple-900 border-3 border-purple-200">
                     <tr>
                         <th scope="col" class="px-6 py-3">
-                                Title 
+                            Title 
                         </th>
                         <th scope="col" class="px-6 py-3">
-                                Description
+                            Description
                         </th>
                         <th scope="col" class="px-6 py-3">
-                                Due Date
+                            Due Date
                         </th>
                         <th scope="col" class="px-6 py-3">
-                                Status
+                            Status
                         </th>
                         <th scope="col" class="px-6 py-3">
-                                Action
+                            Action
                         </th>
                     </tr>
                 </thead>
                 <tbody>
-                     @foreach (var task in taskData)
-                    {
+                @foreach (var task in taskData)
+                {
                             <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                                 <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                @task.Title
+                            @task.Title
                                 </th>
                                 <td class="px-6 py-4">
-                                @task.Description
+                            @task.Description
                                 </td>
                                 <td class="px-6 py-4">
-                                @task.DueDate
+                            @task.DueDate.ToString().Split(" ")[0]
                                 </td>
                                 <td class="px-6 py-4">
-                                @task.Status
+                            @task.Status
                                 </td>
                                 <td class="px-6 py-4">
-                                    <button @onclick="editTask" class="focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-3 py-1.5 mb-1 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">Edit</button>
+                                    <button @onclick="() => editTask(task.Id)" class="focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-3 py-1.5 mb-1 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">Edit</button>
+                                    <button @onclick="() => deleteTask(task.Id)" class="focus:outline-none text-white bg-red-500 hover:bg-red-600 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-3 py-1.5 mb-1 ml-2 dark:bg-red-400 dark:hover:bg-red-500 dark:focus:ring-red-700">Delete</button>
                                 </td>
                             </tr>
-                    }
+                }
                 </tbody>
             </table>
         </div>
-
 }
 
 @code {
-    [Parameter]
-    public int Id { get; set; }
-
     List<TaskData> taskData = new List<TaskData>();
 
     protected override async Task OnInitializedAsync()
     {
-        taskData = await Task.Run(() => taskDataService.GetAllTaskDatas());
+        taskData = await taskDataService.GetAllTaskDatas();
     }
 
-    void editTask()
+    private void NavigateToAddNewTaskPage()
     {
-        NavigationManager.NavigateTo($"/AddNewTask/{Id}");
+        NavigationManager.NavigateTo("AddNewTask");
+    }
+
+    protected void editTask(int taskId)
+    {
+        Console.WriteLine("Hits editTask" + taskId);
+        NavigationManager.NavigateTo($"AddNewTask/{taskId}");
+    }
+
+    protected async Task deleteTask(int taskId)
+    {
+        await taskDataService.DeleteTaskDataDetail(taskId);
+        taskData = await taskDataService.GetAllTaskDatas(); // Update the data
+        StateHasChanged(); // Trigger re-rendering
+        NavigationManager.NavigateTo("Tasks");
     }
 }

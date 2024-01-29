@@ -1,32 +1,39 @@
 ﻿@page "/AddNewTask"
+@page "/AddNewTask/{TaskId:int}"
 @using TMS.Data
 @using TMS.Service
 @inject TaskDataService taskDataService
 @inject NavigationManager NavigationManager
+@* @attribute [RenderModeInteractiveAuto] *@
 
-<h1 class="text-3xl font-semibold text-purple-900">Add New Tasks</h1>
-<EditForm Model="taskData" OnSubmit="CreateNewTaskData" FormName="createtaskform" class="p-8">
+@if (TaskId==0){
+ <h1 class="text-3xl font-semibold text-purple-900">Add New Task</h1>
+}
+else{
+ <h1 class="text-3xl font-semibold text-purple-900">Edit Task</h1>
+}
+<EditForm Model="taskData" OnSubmit="CreateNewTaskData" class="p-8" FormName="AddEditForm">
     <DataAnnotationsValidator/>
     <ValidationSummary/>
     <div class="bg-purple-900 p-8 rounded shadow-md w-96">
         <!-- Task Title -->
         <div class="mb-4 form-group">
             <label class="block text-sm font-medium text-white">Title</label>
-            <InputText class="form-control mt-1 p-2 w-full border rounded-md" @bind-Value="taskData.Title">@taskData.Title</InputText>
+            <InputText class="form-control mt-1 p-2 w-full border rounded-md" @bind-Value="taskData.Title"></InputText>
             <ValidationMessage For="() => taskData.Title"></ValidationMessage>
         </div>
 
         <!-- Task Description -->
         <div class="mb-4 form-group">
             <label class="block text-sm font-medium text-white">Description</label>
-            <InputTextArea rows="3" class="form-control mt-1 p-2 w-full border rounded-md" @bind-Value="taskData.Description">@taskData.Description</InputTextArea>
+            <InputTextArea rows="3" class="form-control mt-1 p-2 w-full border rounded-md" @bind-Value="taskData.Description"></InputTextArea>
             <ValidationMessage For="() => taskData.Description"></ValidationMessage>
         </div>
 
         <!-- Task DueDate -->
         <div class="mb-4 form-group">
             <label class="block text-sm font-medium text-white">Due Date</label>
-            <InputDate class="form-control mt-1 p-2 w-full border rounded-md" @bind-Value="taskData.DueDate">@taskData.DueDate</InputDate>
+                <InputDate class="form-control mt-1 p-2 w-full border rounded-md" @bind-Value="taskData.DueDate"></InputDate>
             <ValidationMessage For="() => taskData.DueDate"></ValidationMessage>
         </div>
 
@@ -34,26 +41,63 @@
         <div class="mb-4 form-group">
             <label class="block text-sm font-medium text-white">Status</label>
                 <InputSelect class="form-control mt-1 p-2 w-full border rounded-md" @bind-Value="taskData.Status">
-                    <option value="">To Do</option>
-                    <option value="">In Progress</option>
-                    <option value="">Completed</option>
+                    <option default selected disabled>Select Status</option>
+                    <option value="To Do">To Do</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Completed">Completed</option>
                 </InputSelect>
             <ValidationMessage For="() => taskData.Status"></ValidationMessage>
         </div>
 
+        <div class="card-footer">
+                    Id: @returnTaskData.Id <br />
+                    Title:@returnTaskData.Title <br />
+                    Description: @returnTaskData.Description <br />
+                    Status: @returnTaskData.Status <br />
+                    DueDate @returnTaskData.DueDate
+                </div>
+
         <div class="flex justify-end space-x-2">
-            <button type="submit" class="px-4 py-2 bg-white font-bold text-purple-900 rounded hover:bg-purple-600 focus:outline-none focus:ring focus:border-blue-300" @onclick="@CreateNewTaskData">Create</button>
+            @if (TaskId == 0)
+            {
+                <button type="submit" class="px-4 py-2 bg-white font-bold text-purple-900 rounded hover:bg-purple-600 focus:outline-none focus:ring focus:border-blue-300" @onclick="@CreateNewTaskData">Create</button>
+            }
+            else
+            {
+                <button type="submit" class="px-4 py-2 bg-white font-bold text-purple-900 rounded hover:bg-purple-600 focus:outline-none focus:ring focus:border-blue-300" @onclick="@CreateNewTaskData">Update</button>
+            }
         </div>
     </div>
 </EditForm>
 
 @code {
     [SupplyParameterFromForm]
-    TaskData taskData { get; set; } = new TaskData();
+    TaskData taskData { get; set; } = new();
+
+
+    private TaskData returnTaskData = new();
+
+    [Parameter]
+    public int TaskId { get; set; }
 
     protected async Task CreateNewTaskData()
     {
-        await taskDataService.AddNewTaskData(taskData);
+        if (TaskId == 0){
+            returnTaskData = await taskDataService.AddNewTaskData(taskData);
+            taskData = new();
+        }
+        else {
+            returnTaskData = await taskDataService.UpdateTaskDataDetail(taskData);
+            taskData = new();
+        }
         NavigationManager.NavigateTo("Tasks");
     }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (TaskId > 0)
+        {
+            taskData = await taskDataService.GetTaskDataById(TaskId);
+        }
+    } 
  }
