@@ -4,7 +4,7 @@
 @inject TaskDataService taskDataService
 @attribute [StreamRendering]
 
-<h1 class="text-3xl font-semibold text-purple-900">Task Dashboard</h1>
+<h1 class="text-3xl font-semibold text-purple-900 p-2">Task Dashboard</h1>
 
 @if (taskData == null)
 {
@@ -12,24 +12,22 @@
 }
 else
 {
-        <div class="grid grid-cols-3 gap-4">
+        <div class="grid grid-cols-3 gap-6 p-8">
             @foreach (var status in statusList)
                 {
-                    <div class="bg-gray-200 h-100 p-4 rounded shadow">
-                        <h2 class="text-md text-gray-600 font-semibold mb-4">@status</h2>
+                        <div class="bg-@getsStatusStyle(status)-100 h-100 p-4 rounded shadow">
+                        <div class="flex">
+                                <h2 class="text-md text-gray-600 font-semibold mb-4">@status</h2>
+                                <h2 class="text-md text-gray-600 font-bold mb-4 mx-2 text-@getsStatusStyle(status)-900">@taskData.Where(t => t.Status == status).Count()   </h2>
+                        </div>
                         @foreach (var task in taskData.Where(t => t.Status == status))
                             {
                             <div class="max-w-sm rounded overflow-hidden shadow-lg mb-4">
-                                <div class="px-4 py-1 max-h-16 w-full bg-purple-900 text-white text-lg rounded">
+                                <div class="px-4 py-1 max-h-16 w-full bg-@getsStatusStyle(status)-900 text-white text-lg rounded">
                                     @task.Title
                                 </div>
-                                <div class="px-4 py-4">
-                                <p class="text-gray-700 text-base">
-                                    @task.Description
-                                </p>
-                                </div>
                                 <div class="px-4 pt-4 pb-1">
-                                    <span class="inline-block bg-gray-200 rounded-full py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">#Due Date: @task.DueDate.ToString().Split(" ")[0]</span>
+                                    <span class="inline-block bg-@getsStatusStyle(status)-200 rounded-full py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">#Due Date: @task.DueDate.ToString().Split(" ")[0]</span>
                                 </div>
                             </div>
                             }
@@ -39,8 +37,24 @@ else
 }
 
 @code {
-    List<string> statusList = new List<string> { "To Do", "In Progress", "Completed"};
+    List<string> statusList = new List<string> { "To Do", "In Progress", "Completed" };
+    List<string> statusStyleList = new List<string> { "gray", "yellow", "green" };
     List<TaskData> taskData = new List<TaskData>();
+    string getsStatusStyle(string status)
+    {
+        switch (status)
+        {
+            case "To Do":
+                return statusStyleList[0];
+            case "In Progress":
+                return statusStyleList[1];
+            case "Completed":
+                return statusStyleList[2];
+            default:
+                return statusStyleList[0];
+        }
+    }
+
 
     protected override async Task OnInitializedAsync()
     {
